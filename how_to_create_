@@ -1,0 +1,107 @@
+==========================================================
+Maven Project: Demo Heart App for EC2
+==========================================================
+
+Step 1: Verify Java and Maven
+--------------------------------
+Commands:
+    java -version
+    mvn -v
+Purpose:
+    Ensure Java and Maven are installed and working.
+
+Step 2: Create Maven Project
+--------------------------------
+Command:
+    mvn archetype:generate -DgroupId=com.example -DartifactId=demo-app-for-ec2-instance \
+    -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+Purpose:
+    Creates a basic Maven Java project with standard folder structure.
+
+Step 3: Navigate to project folder
+--------------------------------
+Command:
+    cd demo-app-for-ec2-instance
+
+Step 4: Set Java version in pom.xml
+--------------------------------
+Edit pom.xml to include:
+<properties>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+</properties>
+Purpose:
+    Ensure project compiles using Java 17.
+
+Step 5: Update App.java
+--------------------------------
+Replace default main method with:
+
+public class App {
+    public static void main(String[] args) throws InterruptedException {
+        String[] heart = {
+            "  ***     ***  ",
+            " *****   ***** ",
+            "******* *******",
+            "***************",
+            " ************* ",
+            "  ***********  ",
+            "   *********   ",
+            "    *******    ",
+            "     *****     ",
+            "      ***      ",
+            "       *       "
+        };
+
+        for (String line : heart) {
+            System.out.println(line);
+            Thread.sleep(100);
+        }
+
+        System.out.println();
+        System.out.println("💖 Jai ❤️ Dhana 💖");
+        System.out.println("✨ Forever Together ✨");
+        System.out.println();
+        System.out.println("  Sending love from your EC2 instance! 😎");
+    }
+}
+
+Purpose:
+    Prints a cute ASCII heart with names and emojis in the console.
+
+Step 6: Build the project
+--------------------------------
+Command:
+    mvn clean install
+Outcome:
+    - Compiles code
+    - Runs tests
+    - Creates target/demo-app-for-ec2-instance-1.0-SNAPSHOT.jar
+
+Step 7: Run the project
+--------------------------------
+Command:
+    java -cp target/demo-app-for-ec2-instance-1.0-SNAPSHOT.jar com.example.App
+Outcome:
+    Displays ASCII heart and emoji message in console.
+
+Step 8: Push to GitHub via SSH
+--------------------------------
+1. Check Git status:
+    git status
+2. Add changes:
+    git add .
+3. Commit:
+    git commit -m "Add ASCII heart and emoji output for Dhana"
+4. Push:
+    git push origin main
+Purpose:
+    Updates the repository with your latest changes.
+
+==========================================================
+Notes:
+- Use SSH for secure GitHub pushes without password prompts.
+- ASCII and emoji output is for fun and personalization.
+- Maven target folder contains compiled JAR files.
+==========================================================
+
