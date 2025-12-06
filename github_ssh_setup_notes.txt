@@ -1,0 +1,95 @@
+==========================================================
+Secure GitHub Access from EC2 Using SSH
+==========================================================
+
+Step 1: Check existing SSH keys
+--------------------------------
+Command:
+    ls -la ~/.ssh
+Purpose:
+    Verify if any SSH key pair exists on the EC2 instance.
+
+Step 2: Generate SSH key pair
+--------------------------------
+Command:
+    ssh-keygen -t ed25519 -C "your-email@example.com" -f ~/.ssh/id_ed25519 -N ""
+Purpose:
+    Create a new SSH key pair (private + public).
+
+Step 3: Secure SSH folder & key
+--------------------------------
+Commands:
+    chmod 700 ~/.ssh
+    chmod 600 ~/.ssh/id_ed25519
+    chmod 644 ~/.ssh/id_ed25519.pub
+Purpose:
+    Set correct permissions for SSH to work.
+
+Step 4: Add key to ssh-agent
+--------------------------------
+Commands:
+    eval "$(ssh-agent -s)"
+    ssh-add ~/.ssh/id_ed25519
+Purpose:
+    Load key into ssh-agent for easier authentication.
+
+Step 5: Copy public key
+--------------------------------
+Command:
+    cat ~/.ssh/id_ed25519.pub
+Purpose:
+    Copy the public key to add to GitHub.
+
+Step 6: Add public key to GitHub
+--------------------------------
+Steps (GitHub Web UI):
+    Settings → SSH and GPG keys → New SSH key
+    Paste the copied public key and save
+Purpose:
+    Authorize EC2 instance to connect to GitHub via SSH.
+
+Step 7: Create SSH config
+--------------------------------
+Commands:
+    cat >> ~/.ssh/config <<'EOF'
+    Host github.com
+      HostName github.com
+      User git
+      IdentityFile ~/.ssh/id_ed25519
+      IdentitiesOnly yes
+    EOF
+    chmod 600 ~/.ssh/config
+Purpose:
+    Ensure Git automatically uses the correct key for GitHub.
+
+Step 8: Test SSH connection
+--------------------------------
+Command:
+    ssh -T git@github.com
+Expected Output:
+    Hi <username>! You've successfully authenticated, but GitHub does not provide shell access.
+
+Step 9: Update Git remote to SSH
+--------------------------------
+Commands (inside your repo):
+    cd ~/your-repo
+    git remote set-url origin git@github.com:<username>/<repo>.git
+    git remote -v
+Purpose:
+    Switch from HTTPS to SSH for secure pushes.
+
+Step 10: Push code
+--------------------------------
+Command:
+    git push origin main
+Purpose:
+    Push commits securely without entering username/password.
+
+==========================================================
+Notes:
+- Never share the private key (~/.ssh/id_ed25519)
+- Public key (~/.ssh/id_ed25519.pub) is safe to share
+- SSH config ensures correct key usage for GitHub
+- Industry standard for secure GitHub access from servers
+==========================================================
+
