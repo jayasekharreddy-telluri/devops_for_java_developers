@@ -1,0 +1,81 @@
+Step-by-step commands to set up PostgreSQL for Spring Boot on Amazon Linux 2023
+
+# Step 1: Update packages
+
+sudo dnf update
+
+# Step 2: Remove MariaDB if installed
+
+sudo dnf remove mariadb105-server mariadb -y
+
+# Step 3: Install PostgreSQL 15
+
+sudo dnf install postgresql15-server postgresql15 -y
+
+# Step 4: Initialize PostgreSQL database cluster
+
+sudo -u postgres /usr/bin/initdb -D /var/lib/pgsql/15/data
+
+# Step 5: Create systemd service file for PostgreSQL
+
+sudo nano /etc/systemd/system/postgresql-15.service
+
+# Paste the following content:
+
+[Unit]
+Description=PostgreSQL 15 database server
+After=network.target
+
+[Service]
+Type=forking
+User=postgres
+ExecStart=/usr/bin/pg_ctl -D /var/lib/pgsql/15/data -l /var/lib/pgsql/15/data/logfile start
+ExecStop=/usr/bin/pg_ctl -D /var/lib/pgsql/15/data stop
+ExecReload=/usr/bin/pg_ctl -D /var/lib/pgsql/15/data reload
+PIDFile=/var/lib/pgsql/15/data/postmaster.pid
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+# Step 6: Fix Windows line endings if needed
+
+sudo dnf install dos2unix -y
+sudo dos2unix /etc/systemd/system/postgresql-15.service
+
+# Step 7: Reload systemd and enable PostgreSQL
+
+sudo systemctl daemon-reload
+sudo systemctl enable postgresql-15
+sudo systemctl start postgresql-15
+sudo systemctl status postgresql-15 --no-pager
+
+# Step 8: Switch to PostgreSQL admin user
+
+sudo -i -u postgres
+
+# Step 9: Access PostgreSQL shell
+
+psql
+
+# Step 10: Create database and user
+
+CREATE DATABASE aws_devops;
+CREATE USER awsuser WITH ENCRYPTED PASSWORD 'password';
+GRANT ALL PRIVILEGES ON DATABASE aws_devops TO awsuser;
+
+# Step 11: Exit PostgreSQL shell
+
+\q
+exit
+
+# Step 12: Update Spring Boot application.properties
+
+spring.datasource.url=jdbc:postgresql://localhost:5432/aws_devops
+spring.datasource.username=awsuser
+spring.datasource.password=password
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+
+
+## install java,maevn and git ,done ssh config for git and clone repo

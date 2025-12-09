@@ -1,0 +1,82 @@
+1️⃣ Download JAR from S3 (Pre-Signed URL Method)
+
+📌 Use this method when AWS CLI is not installed on EC2.
+
+curl -o coupon-service.jar "https://<your-s3-presigned-url>"
+
+-o coupon-service.jar → Saves the JAR with given name
+
+Pre-signed URL provides temporary permission to download securely
+
+2️⃣ Run Spring Boot Application
+
+sudo nano /etc/rc.local
+
+---------------------------content to place in rc.local file---------------------------------
+
+#!/bin/bash
+
+# Ensure jarfiles exist in home
+cd /home/ec2-user/
+
+# Start Product Service
+nohup /usr/bin/java -jar product-service.jar --spring.profiles.active=dev > product.log 2>&1 &
+
+# Start Coupon Service
+nohup /usr/bin/java -jar coupon-service.jar --spring.profiles.active=dev > coupon.log 2>&1 &
+
+exit 0
+
+-------------------------------------------------------------------------------------------------
+
+Make the JAR executable:
+
+	chmod +x coupon-service.jar
+
+Test manually (no reboot yet)
+	sudo /etc/rc.local
+
+Check if services started:
+
+	ps -ef | grep java
+
+Check logs:
+
+tail -f /home/ec2-user/product.log
+tail -f /home/ec2-user/coupon.log
+
+4️⃣ If working → Reboot
+sudo reboot
+
+
+And verify again:
+
+ps -ef | grep java
+
+
+Run the JAR:
+
+java -jar coupon-service.jar
+
+
+✔️ Application starts on the port mentioned in application.properties (9091 in our case)
+
+3️⃣ Why Add Inbound Rule in EC2 Security Group?
+Direction	Purpose	Needed for Our Case?
+Inbound	Allows external traffic → your EC2	✔ Yes — We want Postman/browser to access app
+Outbound	Allows EC2 → outside internet (e.g., DB, S3)	Already allowed by default
+
+📌 Therefore:
+If we expose our app on EC2:9091, we must allow the world to reach it:
+
+Inbound Rule example
+
+Type	Port	Source
+Custom TCP	9091	0.0.0.0/0
+🔍 Test Application from Anywhere
+http://<EC2-Public-DNS>:9091/api/v1/coupons/SAVE50
+
+
+Example:
+
+http://ec2-34-229-75-219.compute-1.amazonaws.com:9091/api/v1/coupons
