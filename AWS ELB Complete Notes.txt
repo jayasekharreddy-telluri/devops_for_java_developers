@@ -1,0 +1,216 @@
+---
+
+# 🌟 AWS ALB / ELB — Complete Updated Notes (Simple & Clear)
+
+---
+
+## **1️⃣ What is a Load Balancer (ALB)?**
+
+* **Definition:** An Application Load Balancer (ALB) distributes incoming traffic (HTTP/HTTPS) from the internet across multiple EC2 instances, containers, or microservices.
+* **Purpose:**
+
+  * High availability
+  * Automatic failover if an instance is down
+  * Scalability
+  * Zero downtime deployment
+  * Health checks on instances
+
+**Example:**
+You have a coupon-service running on 2 EC2 instances. ALB ensures users are split between them and automatically avoids a failed instance.
+
+---
+
+## **2️⃣ What is a Security Group (SG) and why is it needed?**
+
+* **Definition:** SG is a **virtual firewall** controlling inbound/outbound traffic for AWS resources (EC2, ALB, RDS).
+* **Example:**
+  Think of SG as a **bouncer at a building** — only allowed traffic can enter or leave.
+
+---
+
+## **3️⃣ Why does ALB need port 80 in Security Group?**
+
+* **Reason:** ALB receives **HTTP traffic** from the internet.
+* **Inbound rule:** Allow TCP 80 from `0.0.0.0/0`
+* **Without it:** Requests never reach the ALB.
+
+**Example:**
+User opens `http://lb-1-xxxx.elb.amazonaws.com` → request hits ALB → SG allows HTTP 80 → forwarded to listener.
+
+---
+
+## **4️⃣ Why Listener is also on port 80?**
+
+* **Difference between SG and Listener:**
+
+  * **Security Group** = allows traffic (firewall)
+  * **Listener** = handles traffic (traffic controller)
+
+**Listener role:**
+
+* Listens on **port 80** for incoming requests
+* Checks listener rules
+* Forwards requests to **target group**
+
+**Example:**
+ALB listener on port 80 → receives request → forwards to coupon-service target group.
+
+---
+
+## **5️⃣ Why EC2 and ALB should NOT use same Security Group**
+
+* EC2 app runs on **port 9091**.
+* EC2 SG should allow **only ALB** to access port 9091.
+* If same SG is used:
+  ❌ Public can directly access EC2 → **security risk**
+
+**Correct Setup:**
+
+| Component | Security Group allows             |
+| --------- | --------------------------------- |
+| ALB       | Port 80 from internet (0.0.0.0/0) |
+| EC2       | Port 9091 only from ALB SG        |
+
+---
+
+## **6️⃣ Why EC2 runs on port 9091?**
+
+* Because your Spring Boot app is configured as:
+
+```properties
+server.port=9091
+```
+
+* Target group forwards traffic to **port 9091**.
+
+---
+
+## **7️⃣ Full Request Flow — Step by Step**
+
+1. **User hits ALB URL**
+   `http://lb-1-xxxx.elb.amazonaws.com/api/v1/coupons`
+
+2. **ALB Security Group**
+
+* Allows TCP 80 from internet
+* Request reaches ALB
+
+3. **ALB Listener (Port 80)**
+
+* Receives HTTP request
+* Checks rules
+* Forwards to **target group**
+
+4. **Target Group**
+
+* Configured with:
+
+  * Protocol: HTTP
+  * Port: 9091
+  * Targets: EC2 instances
+* Uses **health checks** to avoid unhealthy EC2s
+
+5. **EC2 Security Group**
+
+* Inbound: TCP 9091 only from ALB SG
+* Only ALB can talk to app
+
+6. **Spring Boot app**
+
+* Processes request and returns response
+* ALB sends response back to user
+
+---
+
+## **8️⃣ How ALB Works Internally (Simple Explanation)**
+
+* ALB uses **load balancing algorithms** to distribute traffic:
+
+  1. **Round Robin** – Requests are sent to targets in order, one by one.
+  2. **Least Connections** – Sends traffic to instance with least active connections.
+* ALB performs **health checks** and skips unhealthy targets.
+* **Sticky sessions** can bind a user to one target if needed.
+
+**Example:**
+
+* 2 EC2s (Instance A & B)
+* Requests go: A → B → A → B (round robin)
+* If B fails health check → only A receives requests
+
+---
+
+## **9️⃣ VPC & Subnets Flow**
+
+* **VPC:** Private network in AWS (your cloud city)
+* **Subnet:** Smaller network inside VPC (neighborhood)
+
+  * **Public subnet:** For ALB (accessible from internet)
+  * **Private subnet:** For EC2 (no direct internet)
+* **Internet Gateway (IGW):** Gate for VPC to communicate with internet
+* **Route Table:** Traffic rules in subnet
+
+**Example Setup:**
+
+* VPC: `172.31.0.0/16`
+* Public subnet: `172.31.0.0/20` → ALB
+* Private subnet: `172.31.16.0/20` → EC2 coupon-service
+
+---
+
+## **🔟 How to Create ALB (Step by Step)**
+
+**Step 1 — Create ALB Security Group**
+
+* Inbound: HTTP (port 80) from 0.0.0.0/0
+* Outbound: All traffic to 0.0.0.0/0
+* Name: `alb-sg`
+
+**Step 2 — Create Target Group**
+
+* Type: Instance
+* Protocol: HTTP
+* Port: 9091
+* Health check path: `/api/v1/coupons`
+* Register EC2 instances
+
+**Step 3 — Create Load Balancer**
+
+* Type: Application Load Balancer
+* Scheme: Internet-facing
+* Subnets: Select public subnets
+* Attach `alb-sg`
+* Listener: HTTP 80 → Forward to target group
+
+**Step 4 — Update EC2 Security Group**
+
+* Inbound: TCP 9091 from `alb-sg`
+* Remove: `0.0.0.0/0` on 9091
+
+**Step 5 — Test**
+
+* Open URL: `http://lb-1-xxxx.elb.amazonaws.com/api/v1/coupons`
+* Should get **200 OK** and app response
+
+---
+
+## **11️⃣ Quick Summary**
+
+* **ALB SG:** Allows internet traffic on port 80
+* **ALB Listener:** Receives & forwards traffic on port 80
+* **EC2 SG:** Allows only ALB to access app port 9091
+* **Target Group:** Routes traffic to EC2 instances on port 9091
+* **Never expose app port publicly**
+* **ALB:** Handles routing, failover, load balancing, and health checks
+
+---
+
+## **12️⃣ Extra Notes / Questions Answered**
+
+* **Can requests hit multiple instances?** → Yes, ALB distributes traffic to all healthy targets.
+* **Can you change data on one instance only?** → Yes, ALB doesn’t sync data. You need DB replication for consistency.
+* **Why different SGs for ALB & EC2?** → Security best practice. Avoid exposing app to public.
+* **Health checks path `/api/v1/coupons`** → ensures only healthy EC2s receive traffic.
+* **Listener vs SG** → SG allows traffic, Listener processes and forwards traffic.
+* **Internal ALB flow:** Request → SG → Listener → Target Group → EC2 → Response
+
+
