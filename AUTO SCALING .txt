@@ -1,0 +1,266 @@
+---
+
+# 🚀 AUTO SCALING — REAL TIME NOTES (INTERVIEW STANDARD)
+
+### ✔ Creation Logic
+
+### ✔ Scaling Logic
+
+### ✔ ALB Integration Logic
+
+### ✔ Health Check Logic
+
+### ✔ Interview Questions & Perfect Answers
+
+---
+
+# 🌟 1️⃣ AUTO SCALING GROUP CREATION LOGIC (INTERNAL WORKING + HOW YOU DID IT)
+
+### Step 1 Create Launch Template
+
+Purpose Maintain consistent instance configuration for all future EC2s launched by ASG.
+
+What you configured
+
+ AMI → Amazon Linux 2 or your custom AMI
+ Instance Type → `t2.micro`
+ Key Pair
+ Security Group (80, 9091, 22 allowed)
+ (Optional) User Data → Start your application
+
+Interview Logic
+Launch Template gives repeatable, version-controlled EC2 configurations.
+ASG always pulls instance settings from Launch Template.
+
+---
+
+# 🌟 2️⃣ Create Auto Scaling Group (ASG)
+
+### Internal Logic
+
+When you create ASG
+
+ASG needs
+
+ VPC
+ Subnets
+ Launch Template
+ DesiredMinMax capacity
+ Health check behavior
+ Load balancing
+ Scaling policy
+
+You configured
+
+ Desired = 2
+ Min = 1
+ Max = 4
+ AZ = us-east-1a
+ Attached ALB (lb-1)
+ Target group → coupon-tg
+ Enabled ELB + EC2 health checks
+ Health check grace = 300 sec
+
+---
+
+# 🌟 3️⃣ SCALING POLICY LOGIC (TARGET TRACKING CPU)
+
+### Your configuration
+
+ Target Metric Average CPU Utilization
+ Threshold 50%
+ Instance Warm-up 300 sec
+
+### Internal Logic
+
+```
+If CPU  50% for continuous period
+     ASG triggers scale out → +1 instance
+
+If CPU  50% for continuous period
+     ASG triggers scale in → -1 instance (but not below min)
+```
+
+Real Logic
+CloudWatch Alarm fires → ASG Policy → Launch Template → Launch EC2 → ALB → Register → Start Serving Traffic.
+
+---
+
+# 🌟 4️⃣ LOAD BALANCER LOGIC (ALB + TG Integration)
+
+You attached ALB with
+
+ HTTP listener 80
+ Target Group = coupon-tg
+ Health check path `` or `actuatorhealth`
+
+### Internal Logic
+
+When ASG launches a new instance
+
+1. Instance boots
+2. ASG registers instance with Target Group
+3. Target Group sends health checks (every 30 seconds)
+4. If healthy → ALB sends traffic
+5. If unhealthy → ASG replaces instance
+
+---
+
+# 🌟 5️⃣ HEALTH CHECK LOGIC
+
+### You selected
+
+ EC2 health checks
+ ELB health checks
+
+### Internal Logic
+
+If EC2 is
+
+ Stopped
+ Failed health checks
+ Unhealthy in ALB
+ Terminated
+
+ASG detects and replaces it automatically.
+
+---
+
+# 🌟 6️⃣ LOAD GENERATION LOGIC (Using `stress`)
+
+### Commands you used
+
+#### Light Load
+
+```bash
+stress --cpu 1
+```
+
+#### Medium Load
+
+```bash
+stress --cpu 4 --vm 1 --vm-bytes 256M --timeout 300
+```
+
+#### Heavy Load (for scaling to max)
+
+```bash
+stress --cpu 16 --vm 4 --vm-bytes 512M --timeout 600
+```
+
+### Internal Logic
+
+ CPU goes to 80–100%
+ CloudWatch update (1-minute metric)
+ Target tracking detects CPU  50%
+ Scale out triggered
+ New instances launched
+
+---
+
+# 🌟 7️⃣ SCALE-OUTIN LOGIC
+
+### Scale-Out
+
+```
+High CPU
+CloudWatch → ASG Policy
+ASG Checks Max Limit
+Creates instances
+Registers in Target Group
+Starts receiving traffic
+```
+
+### Scale-In
+
+```
+Low CPU  50%
+CloudWatch → ASG Policy
+ASG chooses oldest instance
+Deregisters from TG
+Terminates instance
+Maintains min capacity
+```
+
+---
+
+# 🚀 REAL INTERVIEW QUESTIONS + ANSWERS (AUTO SCALING)
+
+---
+
+## 1️⃣ Q How did you create an Auto Scaling Group
+
+### Perfect Answer
+
+```
+I created a Launch Template with AMI, instance type, key pair, and security group. 
+Then I created an Auto Scaling Group using that template, selected VPC AZs, 
+attached my ALB target group, enabled EC2 + ELB health checks, 
+and configured desired=2, min=1, max=4 with target tracking at 50% CPU.
+```
+
+---
+
+## 2️⃣ Q How does Auto Scaling decide when to add or remove instances
+
+### Perfect Answer
+
+```
+I used a Target Tracking Scaling Policy with 50% CPU utilization. 
+When average CPU goes above 50%, ASG automatically adds instances.
+When CPU remains below 50%, ASG removes instances but never below the minimum size.
+```
+
+---
+
+## 3️⃣ Q How did you test whether Auto Scaling works
+
+### Perfect Answer
+
+```
+I installed the stress tool and generated high CPU load using
+
+stress --cpu 16 --timeout 600
+
+This pushed CPU near 100%, CloudWatch detected the spike, 
+ASG launched extra instances, and they automatically registered to ALB.
+```
+
+---
+
+## 4️⃣ Q How does ASG integrate with ALB
+
+### Perfect Answer
+
+```
+During ASG creation, I attached my ALB target group. 
+Whenever ASG launches a new instance, it automatically registers 
+with the target group and starts serving traffic only after passing health checks.
+```
+
+---
+
+## 5️⃣ Q What happens if one instance becomes unhealthy
+
+### Perfect Answer
+
+```
+ASG uses ELB + EC2 health checks.
+If an instance fails health checks, it is terminated and a new one is launched.
+ASG always maintains the desired capacity.
+```
+
+---
+
+## 6️⃣ Q What is the purpose of Instance Warm-Up
+
+### Perfect Answer
+
+```
+Instance Warm-Up ensures that new instances are not considered 
+in metrics until they are fully initialized and healthy. 
+I set warm-up to 300 seconds so Spring Boot services have enough time to start.
+```
+
+---
+

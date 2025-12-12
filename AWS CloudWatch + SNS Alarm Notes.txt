@@ -1,0 +1,98 @@
+1️⃣ CloudWatch Alarm Overview
+
+Monitors metrics (CPU, Memory, Disk, etc.) of AWS resources.
+
+Alarm triggers when a metric crosses a threshold for a specified period.
+
+States:
+
+OK → metric within threshold
+
+In Alarm → metric crosses threshold
+
+Insufficient data → not enough data yet
+
+2️⃣ SNS (Simple Notification Service)
+
+Sends notifications via Email, SMS, Lambda, SQS, etc.
+
+Topic: a logical access point to send messages
+
+Subscription: endpoints that receive messages from a topic
+
+Steps to integrate with CloudWatch:
+
+Create SNS topic (coupon_topic)
+
+Add email subscription
+
+Confirm subscription via email
+
+3️⃣ Creating a CloudWatch Alarm
+
+Go to CloudWatch → Alarms → Create Alarm
+
+Specify Metric & Conditions
+
+Metric: CPUUtilization
+
+Instance: e.g., i-056316fdeba90c928
+
+Statistic: Average
+
+Period: 1 min (faster testing)
+
+Threshold: e.g., > 60%
+
+Configure Actions
+
+Send notification to SNS topic (coupon_topic)
+
+Add Alarm Details
+
+Name: coupon-alaram
+
+Description: optional
+
+Preview & Create
+
+Enable actions → alarm fully active
+
+4️⃣ Testing the Alarm
+
+Check Instance ID:
+
+curl http://169.254.169.254/latest/meta-data/instance-id
+
+
+Should match the CloudWatch alarm’s instance ID.
+
+Increase CPU using stress:
+
+# For 1 CPU core, 10 min
+stress --cpu 1 --timeout 600
+# Run in background
+nohup stress --cpu 1 --timeout 600 &
+
+
+Monitor CPU in CloudWatch Graph
+
+Alarm transitions to “In Alarm” → SNS sends email
+
+5️⃣ Tips for Faster Testing
+
+Reduce alarm period from 5 min → 1 min
+
+Use Test Alarm → Set state In Alarm to trigger notifications instantly
+
+After testing, CPU will return to normal → alarm goes back to OK
+
+6️⃣ Key Learnings
+
+CloudWatch alarm only triggers after evaluation period
+
+SNS ensures alerts are delivered to multiple endpoints
+
+Stress testing is safe for short periods but don’t overload production instances
+
+Always confirm EC2 instance ID to match monitored resource
