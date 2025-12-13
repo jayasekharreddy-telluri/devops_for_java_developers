@@ -3,10 +3,11 @@ package com.jai.sprincloud.controller;
 import com.jai.sprincloud.model.Product;
 import com.jai.sprincloud.service.ProductService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -23,4 +24,15 @@ public class ProductController {
         Product saved = productService.saveProduct(product);
         return ResponseEntity.ok(saved);
     }
+
+    @GetMapping("/health")
+    public Map<String, Object> getHealth() {
+        Map<String, Object> status = new HashMap<>();
+        status.put("status", "UP");
+        status.put("timestamp", Instant.now().toString());
+        return status;
+    }
+
+
+
 }

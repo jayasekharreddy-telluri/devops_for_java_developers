@@ -1,0 +1,299 @@
+🔥 AWS RDS – 4 Years Experience Interview Notes
+1️⃣ What is Amazon RDS?
+
+Amazon RDS is a fully managed relational database service that handles:
+
+Provisioning
+
+Patching
+
+Backups
+
+Replication
+
+Failover
+
+Supports:
+
+MySQL
+
+PostgreSQL
+
+MariaDB
+
+Oracle
+
+SQL Server
+
+Aurora
+
+👉 Interview line:
+
+“RDS allows teams to focus on application logic instead of database maintenance.”
+
+2️⃣ Single-AZ vs Multi-AZ (VERY IMPORTANT)
+Single-AZ
+
+One DB instance
+
+No standby
+
+Used for dev/test
+
+Lower cost
+
+Multi-AZ
+
+Primary + Standby in different AZs
+
+Synchronous replication
+
+Automatic failover (30–60 seconds)
+
+Same endpoint after failover
+
+👉 Interview line:
+
+“Multi-AZ improves availability, not performance.”
+
+3️⃣ Read Replicas (Scaling Concept)
+
+Used for read scalability
+
+Asynchronous replication
+
+Separate endpoint
+
+Can be promoted to standalone DB
+
+Use cases:
+
+Read-heavy applications
+
+Reporting
+
+Analytics
+
+👉 Interview line:
+
+“Read replicas help scale read traffic, while Multi-AZ ensures availability.”
+
+4️⃣ Backup & Recovery Strategy
+Automated Backups
+
+Enabled by default
+
+Daily snapshot + transaction logs
+
+Point-in-time recovery
+
+Retention: 1–35 days
+
+Manual Snapshots
+
+User triggered
+
+Retained until deleted
+
+Used before major changes
+
+👉 Interview line:
+
+“Automated backups allow PITR, while manual snapshots are used for long-term retention.”
+
+5️⃣ Security (Must Sound Senior)
+Network Security
+
+Runs inside VPC
+
+Controlled via Security Groups
+
+Prefer private subnet for production
+
+Authentication
+
+DB password
+
+IAM database authentication
+
+Secrets Manager integration
+
+Encryption
+
+At rest using AWS KMS
+
+In transit using SSL/TLS
+
+👉 Interview line:
+
+“We avoid hardcoded credentials and use Secrets Manager with encrypted connections.”
+
+6️⃣ RDS Proxy (Advanced Topic)
+Why RDS Proxy?
+
+Manages DB connections
+
+Prevents connection storms
+
+Improves failover handling
+
+Ideal for microservices & Lambda
+
+👉 Interview line:
+
+“RDS Proxy improves scalability by pooling connections and reducing DB load.”
+
+7️⃣ Performance & Scaling
+Vertical Scaling
+
+Change instance type (t → m → r)
+
+Causes brief downtime
+
+Storage Scaling
+
+Auto storage scaling supported
+
+IOPS depends on storage type
+
+Monitoring
+
+CloudWatch metrics
+
+Performance Insights
+
+Slow query logs
+
+8️⃣ Environment Strategy (4-Year Expectation)
+Environment	Setup
+Dev	Single-AZ, small instance
+QA	Single/Multi-AZ
+Prod	Multi-AZ + backups + monitoring
+
+Spring Boot:
+
+--spring.profiles.active=dev / rds / prod
+
+🎯 REAL INTERVIEW QUESTIONS & ANSWERS
+Q1️⃣ Difference between Multi-AZ and Read Replica?
+
+Answer:
+
+Multi-AZ → High availability (sync)
+
+Read Replica → Read scaling (async)
+
+Q2️⃣ What happens during Multi-AZ failover?
+
+Answer:
+
+Standby promoted to primary
+
+DNS endpoint updated
+
+Application reconnects automatically
+
+Q3️⃣ How do you secure RDS in production?
+
+Answer:
+
+Private subnet
+
+Security groups
+
+IAM auth / Secrets Manager
+
+Encryption at rest & in transit
+
+Q4️⃣ How do you handle database connections in microservices?
+
+Answer:
+
+Use HikariCP
+
+Use RDS Proxy
+
+Limit max connections
+
+Q5️⃣ Can RDS scale automatically?
+
+Answer:
+
+Storage can auto-scale
+
+Instance scaling is manual
+
+Read replicas can be added dynamically
+
+Q6️⃣ How do you monitor slow queries?
+
+Answer:
+
+Enable slow query logs
+
+Use Performance Insights
+
+Analyze CloudWatch metrics
+
+🏗 RDS ARCHITECTURE SCENARIOS
+Scenario 1: Microservices with High Traffic
+
+Design:
+
+RDS PostgreSQL (Multi-AZ)
+
+RDS Proxy
+
+Read Replicas
+
+Private subnet
+
+Why?
+
+HA + scaling
+
+Connection pooling
+
+Secure network
+
+Scenario 2: Cost-Optimized Dev Environment
+
+Design:
+
+Single-AZ
+
+db.t4g.micro
+
+Public access (restricted SG)
+
+Scenario 3: Disaster Recovery Strategy
+
+Design:
+
+Automated backups
+
+Cross-region snapshots
+
+Manual snapshot before releases
+
+Scenario 4: Spring Boot + RDS
+
+Flow:
+
+Spring Boot app
+
+HikariCP pool
+
+RDS endpoint
+
+Failover handled automatically
+
+🧠 FINAL INTERVIEW VERDICT
+
+If you explain RDS like this:
+
+✔ You will pass 4-year interviews
+
+✔ You will sound confident & senior
+
+✔ You can handle architecture questions

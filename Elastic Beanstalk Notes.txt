@@ -1,0 +1,230 @@
+🧠 What Is Elastic Beanstalk?
+
+AWS Elastic Beanstalk (EB) is a Platform as a Service (PaaS) that helps you deploy, manage, monitor, and scale applications without worrying about the underlying infrastructure.
+
+✔ You upload your code (for example, a Spring Boot JAR).
+✔ EB sets up EC2, Load Balancer, Auto Scaling, Monitoring, Environment variables, Security groups, etc., for you.
+
+Think of EB as:
+
+A service that lets you run your application in AWS without worrying about servers.
+
+🧱 Core Concepts
+Application
+
+A logical container for your code versions.
+
+Example: coupon-service, product-service.
+
+Environment
+
+A live deployed instance of an application.
+
+EB environments can be:
+
+Web Server (serves HTTP/HTTPS)
+
+Worker (background tasks)
+
+Application Version
+
+Every time you upload a JAR/WAR for deployment, you give it a version label.
+
+EB uses it to track and rollback.
+
+Platform
+
+Runtime for your app (e.g., Java Corretto 17, Node.js, Python, etc.)
+
+Environment Variables
+
+Key‑value pairs to pass config to the app, such as DB URLs and credentials.
+
+🚀 How EB Deployment Works
+
+You upload your app (JAR/WAR).
+
+EB creates necessary infrastructure:
+
+EC2 Instance(s)
+
+Security Groups
+
+Load Balancer (if chosen)
+
+Auto Scaling Group (if chosen)
+
+EB deploys your app to the EC2 instance(s).
+
+EB monitors health & auto‑scales as needed.
+
+📊 EB Capabilities
+1. Auto Scaling
+
+Automatically increases or decreases instances depending on traffic.
+
+2. Load Balancing
+
+Distributes traffic across instances (useful for high availability).
+
+3. Health Monitoring
+
+EB shows instance health (OK, Warning, Severe).
+
+4. Environment Properties
+
+Pass configuration (like DB connection strings) to your app.
+
+5. Version Management
+
+You can roll back to previous deployments.
+
+📌 Deployment Modes
+Mode	Description
+All at Once	Deploys to all instances simultaneously (fast, but risk of downtime)
+Rolling	Updates in batches (less risky)
+Rolling with Additional Batch	Adds a new batch for zero downtime
+Immutable	Creates separate instances for the update (safest)
+🧪 Typical EB Configuration Steps
+
+Choose Web Server Environment
+
+Set Application name
+
+Upload your JAR/WAR
+
+Choose Platform (Java, Node, etc.)
+
+Set Service Role and EC2 Instance Profile
+
+Configure network & public IP
+
+Set environment variables (like SPRING_PROFILES_ACTIVE)
+
+Review & create
+
+🧠 Interview Questions (with easy explanations)
+❓ Question 1 — What is AWS Elastic Beanstalk?
+
+Answer:
+Elastic Beanstalk is a service from AWS that lets you deploy and manage applications easily without managing servers. You upload your code, and AWS handles everything else like servers, scaling, load balancing, and monitoring.
+
+Simple Explanation:
+It’s like a managed platform where you just push code and AWS runs it for you.
+
+❓ Question 2 — How does EB handle scaling?
+
+Answer:
+Elastic Beanstalk integrates with Auto Scaling Groups to scale the number of EC2 instances up or down based on metrics like CPU usage or network traffic.
+
+Simple Explanation:
+If traffic increases, EB adds more servers; if traffic drops, EB removes extra servers.
+
+❓ Question 3 — What are environment variables in EB?
+
+Answer:
+Environment variables are key‑value settings you configure in the EB console or config files. They are passed to your application at runtime and can store things like DB connection strings or API keys.
+
+Simple Explanation:
+They let your app read configuration without hardcoding it in code.
+
+❓ Question 4 — What’s the difference between service role and instance profile?
+
+Answer:
+
+Service role: Allows Elastic Beanstalk itself to manage AWS resources on your behalf.
+
+Instance profile: Gives AWS resources (like EC2) permission to access AWS services (like S3, Secrets Manager).
+
+Simple Explanation:
+Service role → EB’s own permissions.
+Instance profile → Permissions for your app’s server.
+
+❓ Question 5 — Why do we set SPRING_PROFILES_ACTIVE?
+
+Answer:
+We set SPRING_PROFILES_ACTIVE so Spring Boot loads the correct application-{profile}.properties (e.g., application-rds.properties) for a specific environment like production.
+
+Simple Explanation:
+It tells your app which configuration to use.
+
+❓ Question 6 — What is a 502 Bad Gateway error in EB?
+
+Answer:
+A 502 means the load balancer (Nginx) couldn’t reach your application. Common reasons:
+
+App didn’t start
+
+App crashed
+
+DB connection failure
+
+Wrong port
+
+Simple Explanation:
+EB’s front server (Nginx) can’t talk to your app backend.
+
+❓ Question 7 — What are deployment policies and which is safest?
+
+Answer:
+Deployment policies control how new versions are rolled out:
+
+All at once
+
+Rolling
+
+Rolling with additional batch
+
+Immutable — safest (ensures zero downtime)
+
+Simple Explanation:
+Immutable creates separate instances first, then switches traffic — very safe.
+
+❓ Question 8 — How do you troubleshoot problems in EB?
+
+Answer:
+Use:
+
+Logs (web.stdout.log, nginx/error.log)
+
+Health dashboard
+
+CloudWatch metrics
+
+SSH into EC2 (optional)
+
+Simple Explanation:
+Check logs and system status to find what went wrong.
+
+🧠 Real Scenario — Example Answer
+
+“How would you deploy a Spring Boot microservice with RDS on Elastic Beanstalk?”
+
+First, I build my Spring Boot JAR with an RDS profile. In EB, I choose a Web Server environment, upload the JAR, set platform to Java (Corretto 17), and configure the environment variables with DB URL, username, and password. Then I ensure the RDS security group allows traffic from EB instances. After creating the environment, I verify the health endpoint and logs to confirm successful deployment.
+
+Simple Explanation:
+Upload JAR → set configs → allow DB access → check health.
+
+🧾 Best Practices (Interview Tips)
+
+✔ Keep environment variables out of code.
+✔ Use Immutable or Rolling updates for production.
+✔ Always configure health checks.
+✔ Monitor using CloudWatch and logs.
+✔ Use environment version labels for rollback.
+✔ Secure RDS with correct security group rules.
+
+📌 Common Mistakes to Avoid
+
+❌ Not setting the correct Spring profile → app fails to start.
+❌ Forgetting to open RDS security group for EB instances.
+❌ Using All at Once in production — causes downtime.
+❌ Not monitoring logs.
+
+🧠 Quick One‑Liners (For Interviews)
+
+💡 Elastic Beanstalk automates deployment and scaling.
+💡 Service role is for EB; instance profile is for EC2 permissions.
+💡 Immutable deployment reduces risk during updates.
+💡 Environment properties replace hardcoded config.
+💡 502 error means backend not reachable by proxy.
