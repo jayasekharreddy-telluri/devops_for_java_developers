@@ -1,0 +1,156 @@
+# DOCKERIZING SPRING BOOT MICROSERVICES – SIMPLE NOTES
+
+1. GOAL
+
+---
+
+Dockerize Java Spring Boot microservices and run them as containers
+so they can communicate with PostgreSQL using Docker networking.
+
+---
+
+2. PREREQUISITES
+
+---
+
+* Java Spring Boot app (JAR file)
+* Docker installed
+* Application builds successfully using Maven
+  (target/*.jar must exist)
+
+---
+
+3. DOCKERFILE (MICROSERVICE)
+
+---
+
+Example Dockerfile:
+
+FROM eclipse-temurin:17-jdk-alpine
+WORKDIR /app
+COPY target/*.jar app.jar
+EXPOSE 9090
+ENTRYPOINT ["java","-Dspring.profiles.active=docker","-jar","app.jar"]
+
+Explanation:
+
+* FROM → Base image with Java 17
+* WORKDIR → Folder inside container
+* COPY → Copies JAR file into container
+* EXPOSE → Application port (documentation)
+* ENTRYPOINT → Command to start application
+
+---
+
+4. BUILD DOCKER IMAGE
+
+---
+
+Command:
+docker build -t product-service:1.0 .
+
+What it does:
+
+* Reads Dockerfile
+* Creates Docker image
+* Packages app + Java + dependencies
+
+Verify:
+docker images
+
+---
+
+5. DOCKER NETWORK (IMPORTANT)
+
+---
+
+Create network:
+docker network create micro-net
+
+Why:
+
+* Allows microservices and DB to talk
+* Containers can reach each other using names
+
+---
+
+6. DATABASE CONFIG (DOCKER PROFILE)
+
+---
+
+application-docker.properties:
+
+spring.datasource.url=jdbc:postgresql://postgres-db:5432/mydb
+spring.datasource.username=docker_user
+spring.datasource.password=password
+spring.jpa.hibernate.ddl-auto=update
+
+Important:
+
+* DO NOT use localhost
+* Use container name (postgres-db)
+
+---
+
+7. RUN MICROSERVICE CONTAINER
+
+---
+
+Command:
+docker run -d --name product-service --network micro-net -p 9090:9090 product-service:1.0
+
+Explanation:
+
+* -d → Run in background
+* --name → Container name
+* --network → Same network as DB
+* -p → Port mapping (host → container)
+
+---
+
+8. CHECK STATUS
+
+---
+
+Running containers:
+docker ps
+
+Logs:
+docker logs product-service
+
+---
+
+9. TEST SERVICE
+
+---
+
+Health check:
+[http://localhost:9090/api/v1/products/health](http://localhost:9090/api/v1/products/health)
+
+If UP → Dockerization successful
+
+---
+
+10. IMPORTANT NOTES
+
+---
+
+* Dockerfile defines DEFAULT behavior
+* docker run defines RUNTIME behavior
+* EXPOSE does NOT open ports
+* -p is mandatory to access app
+* Network is mandatory for DB connection
+* One Docker image can be used anywhere
+
+---
+
+11. FINAL RESULT
+
+---
+
+* Spring Boot app runs inside Docker
+* Database runs inside Docker
+* Services communicate via Docker network
+* Same image works in local, EC2, production
+
+END OF FILE
