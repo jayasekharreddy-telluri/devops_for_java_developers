@@ -1,0 +1,83 @@
+# Docker PostgreSQL Container – Complete Explanation (Single File Notes)
+
+## Command Used
+
+```bash
+docker run -d --name postgres-db \
+-e POSTGRES_USER=docker_user \
+-e POSTGRES_PASSWORD=password \
+-e POSTGRES_DB=mydb \
+-p 5432:5432 \
+postgres:15
+```
+
+---
+
+## 1️⃣ docker run
+
+* Creates **and** starts a container from an image
+* Combination of:
+
+  * `docker create`
+  * `docker start`
+
+**Interview line:**
+
+> `docker run` = create + start
+
+---
+
+## 2️⃣ -d (Detached mode)
+
+* Runs container in **background**
+* Terminal is free to use
+* Container keeps running even after logout
+
+---
+
+## 3️⃣ --name postgres-db
+
+* Assigns a **human-readable name** to the container
+* Makes commands easy
+
+Example:
+
+```bash
+docker exec -it postgres-db bash
+```
+
+---
+
+## 4️⃣ Environment Variables (-e)
+
+### POSTGRES_USER=docker_user
+
+* Creates PostgreSQL user automatically at startup
+
+### POSTGRES_PASSWORD=password
+
+* Sets password for the user
+* **Mandatory**
+* If missing → container will fail
+
+### POSTGRES_DB=mydb
+
+* Creates database `mydb` automatically
+
+**Important:**
+These variables are used **only during first initialization** of the container.
+
+---
+
+## 5️⃣ -p 5432:5432 (Port Mapping)
+
+Format:
+
+```
+HOST_PORT : CONTAINER_PORT
+```
+
+Meaning:
+
+* EC2 machine listens on **5432**
+* PostgreSQL inside container listens on **
