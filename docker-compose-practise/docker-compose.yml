@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  web:
+    image: nginx
+    ports:
+      - "8800:80"
+    environment: 
+       username: jai
+       password: jai
+    networks: 
+      - frontend
+    volumes: 
+      - shared-data:/data
+  redis:
+    image: redis
+    networks: 
+      - backend
+    volumes:
+     - shared-data:/data  
+
+
+
+networks:
+  frontend: 
+  backend: 
+
+volumes: 
+  shared-data:
