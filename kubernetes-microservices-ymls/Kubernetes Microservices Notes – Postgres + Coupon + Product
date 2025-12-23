@@ -1,0 +1,131 @@
+Absolutely! Here’s a **well-structured, interview-ready notes document** for everything we’ve covered about your Kubernetes microservices setup (Postgres + Coupon Service + Product Service). I’ve kept it **concise, clear, and practical**.
+
+---
+
+# **Kubernetes Microservices Notes – Postgres + Coupon + Product**
+
+---
+
+## **1️⃣ Kubernetes Core Concepts**
+
+* **Cluster:** A set of nodes running Kubernetes.
+* **Node:** A worker machine (VM or physical) where pods run.
+* **Master/Control Plane:** Manages the cluster (scheduler, API server, controller manager).
+* **Pod:** Smallest deployable unit. Can have 1+ containers that share network and storage.
+* **Container:** Runs the actual application inside a pod.
+* **Service:** Provides stable network access to pods. Types: ClusterIP, NodePort, LoadBalancer.
+* **ConfigMap:** Stores configuration data (key-value) for pods.
+* **Secret:** Stores sensitive data (passwords, tokens) for pods.
+* **PersistentVolume (PV):** Physical storage in the cluster.
+* **PersistentVolumeClaim (PVC):** Pod’s request for storage.
+
+---
+
+## **2️⃣ Why Pods over Direct Containers**
+
+* Kubernetes doesn’t run containers directly because pods allow:
+
+  * Co-located containers to share storage/network
+  * Lifecycle management (replicas, scaling, rolling updates)
+  * Easier scheduling across nodes
+
+* **Pod lifecycle:** Pending → Running → Succeeded/Failed → Terminating
+
+* **Best practice:** 1 container per pod unless tightly coupled processes.
+
+---
+
+## **3️⃣ Persistent Data (Postgres)**
+
+* **Deployment:** `postgres-db`
+* **Container image:** `postgres:15`
+* **Ports:** `5432`
+* **Environment variables:** `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
+* **Volume:** Persistent storage (`pgdata`) to survive pod restarts
+* **Service:** `NodePort` (`postgres-db`) to allow other services to connect
+
+**How it works:**
+
+1. PV and PVC store database data outside pod filesystem.
+2. Pods restart → data persists.
+
+---
+
+## **4️⃣ Coupon Service**
+
+* **Deployment:** `coupon-service`
+* **Image:** `kubjai/coupon-service:1.0`
+* **Container port:** `9091`
+* **Environment variable:** `SPRING_PROFILES_ACTIVE=docker`
+* **Service:** NodePort, e.g., `30009`
+
+**Accessing the service:**
+
+* **Internal cluster:** `http://coupon-service:9091`
+* **External (Minikube Docker driver):**
+
+```bash
+minikube service coupon-service
+```
+
+* Opens tunnel at `http://127.0.0.1:<random-port>`
+
+---
+
+## **5️⃣ Product Service**
+
+* **Deployment:** `product-service`
+* **Image:** `kubjai/product-service:1.0`
+* **Container port:** `9090`
+* **Environment variable:** `SPRING_PROFILES_ACTIVE=docker`
+* **Service:** NodePort, e.g., `30010`
+* **Internal call to coupon-service:** `http://coupon-service:9091`
+
+---
+
+## **6️⃣ Microservice Communication Flow**
+
+```
+Browser
+  ↓ NodePort (product-service)
+Product Pod
+  ↓ Internal call
+Coupon Service Pod
+  ↓ Database query
+Postgres Pod
+```
+
+* **DNS resolution:** Kubernetes automatically resolves service names.
+* **NodePort vs ClusterIP:** NodePort exposes services outside cluster; ClusterIP is internal only.
+
+---
+
+## **7️⃣ Common Issues & Solutions**
+
+| Issue                         | Cause                                       | Fix                               |
+| ----------------------------- | ------------------------------------------- | --------------------------------- |
+| `ErrImagePull`                | Image not pushed or wrong tag               | `docker tag` + `docker push`      |
+| App not accessible externally | Minikube Docker driver NodePort not exposed | Use `minikube service <svc-name>` |
+| Data lost after pod restart   | No persistent volume                        | Use PV + PVC                      |
+
+---
+
+## **8️⃣ Best Practices**
+
+* Use **ConfigMaps** for non-sensitive configs; **Secrets** for passwords/API keys.
+* One container per pod for most cases.
+* Always use **service DNS name** for inter-service communication.
+* Use **NodePort only for development/local clusters**; cloud uses LoadBalancer.
+* Use **rolling update strategy** for deployments: `maxUnavailable:1, maxSurge:1`
+
+---
+
+## **9️⃣ Interview-Ready Points**
+
+* Kubernetes uses pods as atomic units to run containers for lifecycle and networking management.
+* NodePort services on Minikube Docker driver need `minikube service` tunnel to access externally.
+* Persistent data survives pod restarts through PV/PVC.
+* Service DNS inside cluster ensures **service discovery**; IPs are dynamic.
+* Always verify container logs (`kubectl logs <pod>`) if services fail to start.
+
+---

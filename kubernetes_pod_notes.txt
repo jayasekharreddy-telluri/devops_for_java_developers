@@ -1,0 +1,132 @@
+
+KUBERNETES BASIC NOTES (PODS) – BEGINNER FRIENDLY
+
+================================
+1. TOOLS INSTALLED
+================================
+- Docker Desktop (Windows)
+- Minikube
+- kubectl
+
+Important:
+Docker Desktop engine must be RUNNING.
+Minikube uses Docker as the driver.
+
+Commands to verify:
+docker --version
+kubectl version --client
+minikube version
+
+================================
+2. WHAT IS A POD?
+================================
+- Pod is the smallest deployable unit in Kubernetes.
+- Pod is a wrapper around one or more containers.
+- Containers in a Pod share:
+  - Same IP address
+  - Same network
+  - Same storage (volumes)
+
+Interview point:
+Kubernetes does NOT manage containers directly, it manages Pods.
+
+================================
+3. WHY POD IS NOT USED DIRECTLY IN PRODUCTION
+================================
+- No auto-healing
+- No scaling
+- No rolling updates
+
+Solution:
+Use Deployment (Deployment manages Pods)
+
+================================
+4. CREATE POD USING COMMAND
+================================
+Command:
+kubectl run my-first-pod --image=nginx --port=80
+
+Check:
+kubectl get pods
+
+Delete:
+kubectl delete pod my-first-pod
+
+================================
+5. GO INSIDE POD (EXEC)
+================================
+kubectl exec -it my-first-pod -- sh
+(or)
+kubectl exec -it my-first-pod -- bash
+
+Exit:
+exit
+
+================================
+6. CREATE POD USING YAML FILE
+================================
+File name: pod.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: simple-pod
+spec:
+  containers:
+    - name: nginx-container
+      image: nginx
+      ports:
+        - containerPort: 80
+
+Apply:
+kubectl apply -f pod.yaml
+
+Check:
+kubectl get pods
+
+Delete:
+kubectl delete -f pod.yaml
+
+================================
+7. YAML FILE EXPLANATION
+================================
+apiVersion: v1
+- Kubernetes API version for core resources
+
+kind: Pod
+- Resource type
+
+metadata:
+- Information about the Pod
+- name: simple-pod
+
+spec:
+- Desired state of the Pod
+
+containers:
+- List of containers inside the Pod
+
+image: nginx
+- Docker image from Docker Hub
+
+containerPort: 80
+- Port exposed inside container
+- Does NOT expose externally
+
+================================
+8. IMPORTANT INTERVIEW QUESTIONS
+================================
+Q: What is a Pod?
+A: Pod is the smallest Kubernetes unit that runs one or more containers.
+
+Q: Can a Pod have multiple containers?
+A: Yes.
+
+Q: What happens if a Pod crashes?
+A: Pod dies and is recreated (if managed by Deployment).
+
+Q: Difference between Pod and Deployment?
+A: Pod runs containers, Deployment manages Pods.
+
+================================
+END OF NOTES
