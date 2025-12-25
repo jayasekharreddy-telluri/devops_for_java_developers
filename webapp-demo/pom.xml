@@ -17,7 +17,7 @@
   </dependencies>
 
   <build>
-  <finalName>webapp-demo</finalName>
+  <finalName>webapp-demo</finalName> 
     <plugins>
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
