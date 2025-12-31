@@ -1,0 +1,189 @@
+---
+
+# **Jenkins Setup on EC2 – Commands & Explanation**
+
+---
+
+##1️⃣ Install Java 17 (required for Jenkins and Maven)
+
+```bash
+sudo dnf install java-17-amazon-corretto -y
+java -version
+```
+
+**Why:**
+
+* Jenkins requires Java to run.
+* Verify Java is installed correctly.
+
+---
+
+## 2️⃣ Install Maven (for Java project builds)
+
+```bash
+sudo dnf install maven -y
+mvn -version
+```
+
+**Why:**
+
+* Maven is needed to build Java/Spring Boot projects.
+* `mvn -version` ensures Maven is installed and uses the correct Java version.
+
+---
+
+## 3️⃣ Add Jenkins Repository
+
+```bash
+wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+```
+
+**Why:**
+
+* Jenkins is not available in default Amazon Linux repos.
+* This adds the official Jenkins repository so we can install the latest stable Jenkins package.
+
+---
+
+## 4️⃣ Import Jenkins GPG Key
+
+```bash
+rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+```
+
+**Why:**
+
+* GPG key ensures the Jenkins package is authentic and secure.
+* Prevents “package not trusted” errors during install.
+
+---
+
+## 5️⃣ Install Jenkins
+
+```bash
+dnf install jenkins -y
+```
+
+**Why:**
+
+* Installs Jenkins server package from the official repo.
+
+---
+
+## 6️⃣ Start Jenkins Service
+
+```bash
+systemctl start jenkins
+```
+
+**Why:**
+
+* Starts the Jenkins service so it can run in the background.
+* Needed before accessing Jenkins in the browser.
+
+---
+
+## 7️⃣ Check Jenkins Status
+
+```bash
+systemctl status jenkins
+```
+
+**Why:**
+
+* Confirms Jenkins is **running correctly**.
+* Shows active process, memory usage, logs.
+
+---
+
+## 8️⃣ Enable Jenkins on Boot
+
+```bash
+systemctl enable jenkins
+```
+
+**Why:**
+
+* Ensures Jenkins **starts automatically** when the EC2 instance restarts.
+
+---
+
+## 9️⃣ Get Initial Admin Password
+
+```bash
+cat /var/lib/jenkins/secrets/initialAdminPassword
+```
+
+**Why:**
+
+* Jenkins requires a one-time **initial admin password** to unlock the web UI.
+* Ensures secure first-time setup.
+
+---
+
+## 10️⃣ Access Jenkins UI
+
+* Open in browser:
+
+```
+http://<EC2-PUBLIC-IP>:8080
+```
+
+**Why:**
+
+* Access the Jenkins dashboard.
+* Use the admin password from previous step to unlock.
+
+---
+
+## 11️⃣ Install Suggested Plugins (via UI)
+
+* Click **Install suggested plugins** on the unlock screen.
+
+**Why:**
+
+* Installs essential plugins for CI/CD, Git, Maven, Pipeline, Docker, etc.
+* Simplifies setup for beginners and interview purposes.
+
+---
+
+✅ **Optional Notes / Interview Tip**
+
+* Always mention **Java and Maven versions** when asked.
+* Explain the **role of each command**: Java → runtime, Maven → build, Repo → package source, GPG → security, etc.
+* Using EC2 shows **AWS cloud skills** in interviews.
+
+---
+
+
+
+Jenkins setup in local with docker image:
+
+
+
+Run exactly this command (single line):
+
+docker run -d -p 8080:8080 -p 50000:50000 --name jenkins -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts
+
+If container already exists
+
+If you get name already in use, run:
+
+docker rm -f jenkins
+
+
+Then run the Jenkins command again.
+
+🔑 GET INITIAL ADMIN PASSWORD
+
+After container starts:
+
+docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+
+🌐 OPEN JENKINS UI
+
+Browser:
+
+http://localhost:8080
+
+
