@@ -11,10 +11,11 @@ phases:
       java: corretto17
 
   pre_build:
-    commands:
-      - echo Logging in to Docker Hub
-      - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-
+  commands:
+    - echo "DEBUG: Username=$DOCKERHUB_USERNAME"
+    - echo "DEBUG: Token=${DOCKERHUB_TOKEN:0:4}..."
+    - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+    
   build:
     commands:
       - echo Building product-service Docker image
