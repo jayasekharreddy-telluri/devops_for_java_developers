@@ -4,10 +4,10 @@ phases:
   install:
     runtime-versions:
       java: corretto17
+
   build:
     commands:
-      - cd webapp-demo
-      - mvn clean package
-artifacts:
-  files:
-    - webapp-demo/target/*.jar
+      - echo Building product-service Docker image
+      - cd product-service
+      - mvn clean package -DskipTests
+      - docker build -t product-service:latest .
