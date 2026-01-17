@@ -2,8 +2,8 @@ version: 0.2
 
 env:
   secrets-manager:
-    DOCKERHUB_USERNAME: dockerhub-username
-    DOCKERHUB_TOKEN: dockerhub-token
+    DOCKERHUB_USERNAME: dockerhub-username:username  # reference the key inside the secret
+    DOCKERHUB_TOKEN: dockerhub-token:token          # reference the key inside the secret
 
 phases:
   install:
@@ -15,6 +15,8 @@ phases:
 
   pre_build:
     commands:
+      - echo "DEBUG: DOCKERHUB_USERNAME=$DOCKERHUB_USERNAME"
+      - echo "DEBUG: DOCKERHUB_TOKEN=${DOCKERHUB_TOKEN:0:4}..."
       - echo "Logging in to Docker Hub..."
       - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
       - echo "Docker login succeeded."
