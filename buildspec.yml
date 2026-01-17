@@ -17,24 +17,21 @@ phases:
 
   pre_build:
     commands:
-      - echo "DEBUG: Username=$DOCKERHUB_USERNAME"
-      - echo "DEBUG: Token=${DOCKERHUB_TOKEN:0:4}..."
+      - echo "DockerHub Username Loaded"
       - echo "Logging in to Docker Hub..."
       - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-      - echo "Docker login succeeded."
 
   build:
     commands:
-      - echo "Building product-service Docker image..."
+      - echo "Building Docker image..."
       - cd product-service
       - mvn clean package -DskipTests
       - docker build -t $DOCKERHUB_USERNAME/product-service:latest .
 
   post_build:
     commands:
-      - echo "Pushing Docker image to Docker Hub..."
+      - echo "Pushing Docker image..."
       - docker push $DOCKERHUB_USERNAME/product-service:latest
-      - echo "Docker image push completed successfully."
 
 artifacts:
   files:
