@@ -1,6 +1,7 @@
 version: 0.2
 
 env:
+  # Secrets stored in AWS Secrets Manager
   secrets-manager:
     DOCKERHUB_USERNAME: dockerhub-username
     DOCKERHUB_TOKEN: dockerhub-token
@@ -9,25 +10,30 @@ phases:
   install:
     runtime-versions:
       java: corretto17
+    commands:
+      - echo "Installing prerequisites..."
+      - yum install -y docker
 
   pre_build:
-  commands:
-    - echo "DEBUG: Username=$DOCKERHUB_USERNAME"
-    - echo "DEBUG: Token=${DOCKERHUB_TOKEN:0:4}..."
-    - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-    
+    commands:
+      - echo "DEBUG: Username=$DOCKERHUB_USERNAME"
+      - echo "DEBUG: Token=${DOCKERHUB_TOKEN:0:4}..."
+      - echo "Logging in to Docker Hub..."
+      - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+      - echo "Docker login succeeded."
+
   build:
     commands:
-      - echo Building product-service Docker image
+      - echo "Building product-service Docker image..."
       - cd product-service
       - mvn clean package -DskipTests
       - docker build -t $DOCKERHUB_USERNAME/product-service:latest .
 
   post_build:
     commands:
-      - echo Pushing Docker image to Docker Hub
+      - echo "Pushing Docker image to Docker Hub..."
       - docker push $DOCKERHUB_USERNAME/product-service:latest
-      - echo Docker image push completed successfully
+      - echo "Docker image push completed successfully."
 
 artifacts:
   files:
