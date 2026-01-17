@@ -12,6 +12,8 @@ phases:
     commands:
       - echo "Installing Docker..."
       - yum install -y docker
+      - service docker start
+      - docker info
 
   pre_build:
     commands:
