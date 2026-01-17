@@ -1,13 +1,33 @@
 version: 0.2
 
+env:
+  secrets-manager:
+    DOCKERHUB_USERNAME: dockerhub-username
+    DOCKERHUB_TOKEN: dockerhub-token
+
 phases:
   install:
     runtime-versions:
       java: corretto17
+
+  pre_build:
+    commands:
+      - echo Logging in to Docker Hub
+      - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
 
   build:
     commands:
       - echo Building product-service Docker image
       - cd product-service
       - mvn clean package -DskipTests
-      - docker build -t product-service:latest .
+      - docker build -t $DOCKERHUB_USERNAME/product-service:latest .
+
+  post_build:
+    commands:
+      - echo Pushing Docker image to Docker Hub
+      - docker push $DOCKERHUB_USERNAME/product-service:latest
+      - echo Docker image push completed successfully
+
+artifacts:
+  files:
+    - '**/*'
