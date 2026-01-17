@@ -1,0 +1,13 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto17
+  build:
+    commands:
+      - cd webapp-demo
+      - mvn clean package
+artifacts:
+  files:
+    - webapp-demo/target/*.jar
