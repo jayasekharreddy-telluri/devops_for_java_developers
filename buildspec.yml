@@ -1,9 +1,10 @@
 version: 0.2
 
 env:
+  # Secrets stored in AWS Secrets Manager
   secrets-manager:
-    DOCKERHUB_USERNAME: dockerhub-username:username  # reference the key inside the secret
-    DOCKERHUB_TOKEN: dockerhub-token:token          # reference the key inside the secret
+    DOCKERHUB_USERNAME: dockerhub-username:username
+    DOCKERHUB_TOKEN: dockerhub-token:token
 
 phases:
   install:
