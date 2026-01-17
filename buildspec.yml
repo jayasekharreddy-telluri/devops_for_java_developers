@@ -1,7 +1,6 @@
 version: 0.2
 
 env:
-  # Secrets stored in AWS Secrets Manager
   secrets-manager:
     DOCKERHUB_USERNAME: dockerhub-username
     DOCKERHUB_TOKEN: dockerhub-token
@@ -11,13 +10,11 @@ phases:
     runtime-versions:
       java: corretto17
     commands:
-      - echo "Installing prerequisites..."
+      - echo "Installing Docker..."
       - yum install -y docker
 
   pre_build:
     commands:
-      - echo "DEBUG: Username=$DOCKERHUB_USERNAME"
-      - echo "DEBUG: Token=${DOCKERHUB_TOKEN:0:4}..."
       - echo "Logging in to Docker Hub..."
       - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
       - echo "Docker login succeeded."
