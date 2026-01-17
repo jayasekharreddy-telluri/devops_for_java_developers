@@ -12,8 +12,7 @@ phases:
     runtime-versions:
       java: corretto17
     commands:
-      - yum install -y docker
-      - service docker start
+      - docker --version
 
   pre_build:
     commands:
